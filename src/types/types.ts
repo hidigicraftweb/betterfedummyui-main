@@ -12,7 +12,7 @@ export interface User {
   photo: string;
   phone: string;
   gender: string;
-  roles?: Role[];
+  roles?: string[];
   token?: string;
 }
 

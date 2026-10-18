@@ -3,11 +3,29 @@ import { User } from "../types/types";
 import { AxiosError } from "axios"; 
 import csrfClient from "./csrfClient";
 
+const normalizeRoles = (roles: unknown): string[] => {
+  if (!Array.isArray(roles)) {
+    return [];
+  }
+
+  return roles.map((role) => {
+    if (typeof role === "string") {
+      return role;
+    }
+
+    if (role && typeof role === "object" && "name" in role && typeof role.name === "string") {
+      return role.name;
+    }
+
+    return "";
+  }).filter(Boolean);
+};
+
 export const authService = {
   fetchUser: async (): Promise<User | null> => {
     try {
       const { data } = await apiClient.get("/user");
-      return { ...data, roles: data.roles ?? [] };  
+      return { ...data, roles: normalizeRoles(data.roles) };
     } catch (error) {
       if (error instanceof AxiosError) {
         throw new Error(error.response?.data?.message || "Error fetching user.");
@@ -18,14 +36,13 @@ export const authService = {
 
   login: async (email: string, password: string): Promise<User> => {
     try { 
-       
       await csrfClient.get("/sanctum/csrf-cookie");
 
       const { data } = await apiClient.post(
         "/login",
         { email, password },
       ); 
-      return { ...data.user, roles: data.user.roles ?? [] };
+      return { ...data.user, roles: normalizeRoles(data.user?.roles) };
     } catch (error) {
       if (error instanceof AxiosError) {
         throw new Error(error.response?.data?.message || "Invalid credentials.");

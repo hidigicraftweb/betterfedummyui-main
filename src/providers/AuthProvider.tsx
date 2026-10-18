@@ -40,10 +40,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     initializeUser();
   }, [location]);
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string): Promise<User> => {
     try {
       const userData = await authService.login(email, password);
       setUser(userData);
+      return userData;
     } catch (error) {
       console.error("Login error:", error);
       throw error;

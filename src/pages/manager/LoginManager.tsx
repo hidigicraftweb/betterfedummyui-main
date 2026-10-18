@@ -10,10 +10,8 @@ const LoginManager = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!loading && user?.roles) {
-      if (user.roles.includes("manager")) {
-        navigate("/admin/overview");
-      }
+    if (!loading && user?.roles?.some((role) => role === "manager")) {
+      navigate("/admin/overview");
     }
   }, [user, loading, navigate]);
 
@@ -22,8 +20,8 @@ const LoginManager = () => {
     setError(null);
 
     try {
-      await login(email, password);
-      if (user && user.roles?.includes("manager")) {
+      const loggedUser = await login(email, password);
+      if (loggedUser.roles?.some((role) => role === "manager")) {
         navigate("/admin/overview");
       }
     } catch (error) {
